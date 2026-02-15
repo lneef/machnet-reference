@@ -1,0 +1,7 @@
+build/
+subprojects/machnet
+subprojects/gflags-2.2.2
+subprojects/tlx
+subprojects/packagecache
+subprojects/.wraplock
+.cache/

@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://github.com/microsoft/machnet.git
+revision = main
+depth = 1
+clone-recursive = true
+method = cmake
