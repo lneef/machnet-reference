@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
 
   while (!terminate) {
     const ssize_t rcvd = machnet_recv(channel, &req, sizeof(req), &flow);
+    assert(rcvd >= 0 && "recv failed");
     if (rcvd == 0)
       continue;
     store.serve(&comp, &req);

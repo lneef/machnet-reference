@@ -65,7 +65,8 @@ int main(int argc, char **argv) {
     auto tid = slt_storage.free_slots.front();
     slt_storage.free_slots.pop_front();
     kv::create_kv_request(reinterpret_cast<uint8_t *>(&req), tid, dist(rng));
-    ret = machnet_send(channel, flow, &resp, sizeof(resp));
+    printf("%u\n", tid);
+    ret = machnet_send(channel, flow, &req, sizeof(req));
     ++t;
   }
 
