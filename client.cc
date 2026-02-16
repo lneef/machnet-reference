@@ -42,6 +42,9 @@ int main(int argc, char **argv) {
   unsigned t = 0;
   unsigned c = 0;
   void *channel = machnet_attach();
+  ret = machnet_listen(channel, FLAGS_local.c_str(), FLAGS_lport);
+  assert(ret == 0 && "Listen failed");
+
   ret = machnet_connect(channel, FLAGS_local.c_str(), FLAGS_remote.c_str(),
                         FLAGS_rport, &flow);
 
