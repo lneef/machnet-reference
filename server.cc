@@ -4,13 +4,23 @@
 #include <gflags/gflags.h>
 #include <machnet.h>
 #include <sys/types.h>
+#include <signal.h>
 
-volatile int terminate = 0;
+static volatile int terminate = 0;
+
+static void handler(int sig) {
+  (void)sig;
+  terminate = 1;
+}
 
 DEFINE_string(local, "", "Local IP address");
 DEFINE_uint32(port, 2, "Port to listen");
 
 int main(int argc, char **argv) {
+    struct sigaction sa = {};
+  sa.sa_handler = handler;
+  sigaction(SIGINT, &sa, NULL);
+  sigaction(SIGTERM, &sa, NULL);  
   gflags::ParseCommandLineFlags(&argc, &argv, false);
   int ret = machnet_init();
   assert(ret == 0 && "machnet init failed");
