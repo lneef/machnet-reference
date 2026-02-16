@@ -38,14 +38,13 @@ int main(int argc, char **argv) {
   int ret = machnet_init();
   assert(ret == 0 && "machnet init failed");
 
-  MachnetFlow_t flow;
+  MachnetFlow_t flow, rflow;
   slot_storage slt_storage{128};
   kv::kv_packet<kv::kv_request> req;
   kv::kv_packet<kv::kv_completion> resp;
   unsigned t = 0;
   unsigned c = 0;
   void *channel = machnet_attach();
-  ret = machnet_listen(channel, FLAGS_local.c_str(), FLAGS_lport);
   assert(ret == 0 && "Listen failed");
 
   ret = machnet_connect(channel, FLAGS_local.c_str(), FLAGS_remote.c_str(),
@@ -56,7 +55,7 @@ int main(int argc, char **argv) {
   ssize_t rcvd;
   auto start = std::chrono::steady_clock::now();
   while (t < kDefaultTXN) {
-    while ((rcvd = machnet_recv(channel, &resp, sizeof(resp), &flow)) > 0) {
+    while ((rcvd = machnet_recv(channel, &resp, sizeof(resp), &rflow)) > 0) {
       handle_completion(&resp, slt_storage);
       ++c;
     }
@@ -71,7 +70,7 @@ int main(int argc, char **argv) {
   }
 
   while (c < kDefaultTXN) {
-    while ((rcvd = machnet_recv(channel, &resp, sizeof(resp), &flow)) > 0) {
+    while ((rcvd = machnet_recv(channel, &resp, sizeof(resp), &rflow)) > 0) {
       handle_completion(&resp, slt_storage);
       ++c;
     }

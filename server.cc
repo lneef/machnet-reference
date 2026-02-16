@@ -31,18 +31,19 @@ int main(int argc, char **argv) {
 
   kv::kv_packet<kv::kv_request> req;
   kv::kv_packet<kv::kv_completion> comp;
-  MachnetFlow_t flow;
+  MachnetFlow_t tx_flow, rx_flow;
   kv::kv_store store;
   store.prepare();
 
   while (!terminate) {
-    const ssize_t rcvd = machnet_recv(channel, &req, sizeof(req), &flow);
+    const ssize_t rcvd = machnet_recv(channel, &req, sizeof(req), &rx_flow);
     assert(rcvd >= 0 && "recv failed");
     if (rcvd == 0)
       continue;
     store.serve(&comp, &req);
+    tx_flow = rx_flow;
     do {
-      ret = machnet_send(channel, flow, &comp, sizeof(comp));
+      ret = machnet_send(channel, tx_flow, &comp, sizeof(comp));
     } while (ret != 0);
   }
 
