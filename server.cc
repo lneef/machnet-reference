@@ -41,7 +41,10 @@ int main(int argc, char **argv) {
     if (rcvd == 0)
       continue;
     store.serve(&comp, &req);
-    tx_flow = rx_flow;
+    tx_flow.dst_ip = rx_flow.src_ip;
+    tx_flow.src_ip = rx_flow.dst_ip;
+    tx_flow.dst_port = rx_flow.src_port;
+    tx_flow.src_port = rx_flow.dst_port;
     do {
       ret = machnet_send(channel, tx_flow, &comp, sizeof(comp));
     } while (ret != 0);
