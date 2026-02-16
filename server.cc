@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
   kv::kv_packet<kv::kv_completion> comp;
   MachnetFlow_t flow;
   kv::kv_store store;
+  store.prepare();
 
   while (!terminate) {
     const ssize_t rcvd = machnet_recv(channel, &req, sizeof(req), &flow);
