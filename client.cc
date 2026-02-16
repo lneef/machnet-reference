@@ -1,10 +1,13 @@
 #include "kv.h"
 #include "machnet_common.h"
 #include <cassert>
+#include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <deque>
 #include <gflags/gflags.h>
 #include <machnet.h>
+#include <ratio>
 #include <sys/types.h>
 
 DEFINE_string(remote, "", "server ip");
@@ -51,6 +54,7 @@ int main(int argc, char **argv) {
   assert(ret == 0 && "Connect failed");
 
   ssize_t rcvd;
+  auto start = std::chrono::steady_clock::now();
   while (t < kDefaultTXN) {
     while ((rcvd = machnet_recv(channel, &resp, sizeof(resp), &flow)) > 0) {
       handle_completion(&resp, slt_storage);
@@ -71,5 +75,7 @@ int main(int argc, char **argv) {
       ++c;
     }
   }
+  auto end = std::chrono::steady_clock::now();
+  printf("%f\n", std::chrono::duration<double, std::micro>(end - start).count());
   return 0;
 }
