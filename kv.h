@@ -1,12 +1,8 @@
 #pragma once
-
 #include <cstdint>
 #include <new>
-#include <random>
-#include <ranges>
-#include <tlx/container/btree_map.hpp>
-
-namespace kv {
+namespace kv{
+static constexpr uint16_t payload_offset = 0;  
 enum class packet_t : uint8_t {
   SINGLE = 0,
   BATCH = 1,
@@ -43,15 +39,8 @@ struct [[gnu::packed]] kv_scan {
 struct [[gnu::packed]] kv_completion {
   response_t reponse;
   int64_t key;
-  int64_t val;
-};
-
-struct [[gnu::packed]] kv_scan_completion {
-  uint64_t cnt;
-  struct {
-    int64_t key;
-    int64_t val;
-  } data[];
+  uint64_t data_len;
+  char data[];
 };
 
 template <typename T> struct [[gnu::packed]] kv_packet : public kv_packet_base {
@@ -80,38 +69,6 @@ inline void create_kv_scan(uint8_t *data, uint64_t id, int64_t low,
   kv_scn->payload.low = low;
   kv_scn->payload.high = high;
 }
+}; // namespace kv
 
-struct kv_store {
-  static constexpr uint32_t kStoreSize = 1024 * 1024;
-  std::random_device rdev;
-  std::mt19937 rng{rdev()};
-  std::uniform_int_distribution<int64_t> dist{INT64_MIN, INT64_MAX};
-  tlx::btree_map<int64_t, int64_t> store;
 
-  void prepare() {
-    uint32_t size = kStoreSize;
-    for (auto [k, v] :
-         std::ranges::views::iota(0u, size) | std::views::transform([&](int) {
-           return std::make_pair(dist(rng), dist(rng));
-         })) {
-      store[k] = v;
-    }
-  }
-
- void serve(kv_packet<kv_completion>* resp,
-                      kv::kv_packet<kv::kv_request> *req) {
-  auto key = req->payload.key;
-  auto it = store.find(key);
-  resp->id = req->id;
-  resp->pt = req->pt;
-  resp->payload.key = req->payload.key;
-  if (it == store.end()) {
-    resp->payload.reponse = kv::response_t::FAILURE;
-    resp->payload.val = 0;
-  } else {
-    resp->payload.reponse = kv::response_t::SUCCESS;
-    resp->payload.val = it->second;
-  }
-}
-};
-} // namespace kv
